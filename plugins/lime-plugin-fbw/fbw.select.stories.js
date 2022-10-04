@@ -1,13 +1,12 @@
-/* eslint-disable react/jsx-no-bind */
-import { h } from 'preact';
-import { storiesOf } from '@storybook/preact';
-import { action } from '@storybook/addon-actions';
-import {FbwBanner} from "./src/containers/FbwBanner";
+import { action } from "@storybook/addon-actions";
 
-storiesOf('Containers/First boot wizard', module)
+import { SelectAction } from './src/containers/SelectAction';
 
-	.add('Choose an option', () => (
-		<FbwBanner
-			toggleForm={(data) => () => action('toggleForm')(data)}
-		/>
-	));
+export default {
+    title: "Containers/First boot wizard",
+}
+
+export const ChooseAnOption = () => (
+    <SelectAction toggleForm={(data) => () => action("toggleForm")(data)} />
+)
+
