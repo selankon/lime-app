@@ -1,118 +1,172 @@
-import { h } from 'preact';
-import { useState } from 'preact/hooks';
-import { Trans } from '@lingui/macro';
+import { h, Component } from 'preact';
+import I18n from 'i18n-js';
+<<<<<<< HEAD
+import { connect } from 'preact-redux';
+=======
+>>>>>>> feat(fbw): add new options and alert messages
 
-import '../style.less';
+import '../style';
 
-import ProgressBar from 'components/progressbar';
-import Loading from 'components/loading';
-import { useInterval } from 'react-use';
+import ProgressBar from '../../../../src/components/progressbar';
+<<<<<<< HEAD
+import axios from 'axios';
+=======
+>>>>>>> feat(fbw): add new options and alert messages
 
-export const Setting = ({ expectedHost, expectedNetwork, delay=1000 }) => {
-	const [ progress, setProgress ] = useState(0);
-	const [ time, setTime ] = useState(120);
+class Setting extends Component {
+	toggleForm(form) {
+		return () => this.setState({ form });
+	}
 
-	const [ state, setState ] = useState({
-		hostname: null,
-		action: 'setting',
-		notOnNetwork: false
-	});
+<<<<<<< HEAD
+	checkHost () {
+		this.runProgress('checking', 120, 3, () => clearInterval(this.progressInterval));
+		this.fetchHost();
+	}
 
-	const wifiSsid = `${expectedNetwork}/${expectedHost}`;
-	function fetchHost () {
-		if (state.action === 'finish') return;
-		if (state.action === 'setting') {
-			setState({
-				...state, action: 'checking'
-			});
-		}
-
-		fetch('http://thisnode.info/cgi-bin/hostname')
-			.then(res => res.text())
-			.then(res => {
-				res = res.split('\n')[0];
-				if (res === expectedHost) {
-					setState({
-						...state,
-						action: 'finish',
-						hostname: res,
+	fetchHost () {
+		setTimeout(() => {
+			axios.get('http://thisnode.info/cgi-bin/hostname')
+				.then(res => res.data.split('\n')[0])
+				.then(res => {
+					if (res === this.props.expectedHost) {
+						this.setState({
+							hostname: res,
+							time: 0,
+							action: 'finish'
+						});
+					}
+					else {
+						this.fetchHost();
+						this.setState({
+							notOnNetwork: true
+						});
+					}
+				})
+				.catch(err => {
+					console.log(err);
+					this.setState({
 						notOnNetwork: false
 					});
-				}
-				else if (state.notOnNetwork === false) {
-					setState({
-						...state,
-						notOnNetwork: true
-					});
-				}
-			})
-			.catch(() => {
-				if (state.notOnNetwork === true) {
-					setState({
-						...state,
-						notOnNetwork: false
-					});
-				}
-			});
+					this.fetchHost();
+				});
+		}, 3000);
 	}
 
-	function runProgress (totalTime, cb) {
-		if (time > 0) setTime(time => time - 1);
-		if (progress < 100) setProgress(progress => progress + (100/totalTime));
-		if (time <= 1) cb();
-	}
-
-	function reload () {
-		window.location.href = 'http://thisnode.info/app';
-	}
-
-	useInterval(() => {
-		runProgress(120, fetchHost);
-	}, delay);
-
-
-	return (
-		<div class="container container-padded">
-			{state.action !== 'finish'
-				? (
-					<div>
-						{ state.action === 'setting'
-							? (
-								<div>
-									<h1><Trans>Setting network</Trans></h1>
-									<ProgressBar progress={progress} />
-									<div style={{ width: '100%' }}>
-										<span style={{ margin: '0 auto', textAlign: 'center' }}><Trans>Please wait {time} seconds</Trans></span>
-									</div>
-								</div>
-							)
-							: false
-						}
-						{ state.action === 'checking'
-							? (
-								<div>
-									<h1><Trans>Checking connection</Trans></h1>
-									<Loading />
-									  { state.notOnNetwork
-										? <p><Trans>You are connected to another node in the network, try connecting to</Trans> {expectedNetwork}/{expectedHost}</p>
-										: <p><Trans>You should try to connect to the network {wifiSsid}.</Trans></p>
-									  }
-								</div>
-							  )
-							: false
-						}
-					</div>
-				)
-				: <div>
-					<h1><Trans>Congratulations</Trans></h1>
-					<div>
-						<p><Trans>You have successfuly connected to</Trans> {state.hostname}</p>
-						<p><Trans>You are now part of </Trans> {expectedNetwork}</p>
-						<button onClick={reload}><Trans>Reload page</Trans></button>
-					</div>
-				</div>
+	runProgress (action, time, rate, cb) {
+		this.setState({
+			action,
+			time
+		});
+		const addProgress = () => {
+			if (this.state.time > 0) {
+				this.setState({
+					progress: this.state.progress + (100/time),
+					time: --this.state.time
+				});
 			}
-		</div>
-	);
-};
+			else {
+				clearInterval(this.progressInterval);
+				this.setState({
+					progress: 0,
+					time: 0
+				});
+				cb();
+			}
+		};
+		this.progressInterval = setInterval(addProgress, rate*1000);
+	}
 
+	reload () {
+		window.location.href = 'http://thisnode.info/app';
+=======
+	runProgress () {
+		const addProgress = () => {
+			if (this.state.progress <= 99.96) {
+				this.setState({
+					progress: this.state.progress + 1.666666,
+					time: this.state.time - 1
+				});
+			}
+			else {
+				clearInterval(progressInterval);
+			}
+		};
+		const progressInterval = setInterval(addProgress, 1000);
+>>>>>>> feat(fbw): add new options and alert messages
+	}
+
+	constructor(props){
+		super(props);
+<<<<<<< HEAD
+		this.runProgress = this.runProgress.bind(this);
+		this.fetchHost = this.fetchHost.bind(this);
+		this.checkHost = this.checkHost.bind(this);
+
+		this.state = {
+			progress: 0,
+			time: null,
+			hostname: null,
+			action: null
+=======
+		this.state = {
+			progress: 0,
+			time: 60
+>>>>>>> feat(fbw): add new options and alert messages
+		};
+	}
+
+	componentDidMount() {
+<<<<<<< HEAD
+		this.runProgress('setting', 60, 1, this.checkHost);
+=======
+		setTimeout(() => {
+			const interval = setInterval(() => {
+
+			}, 3000);
+		}, 60000);
+		this.runProgress();
+>>>>>>> feat(fbw): add new options and alert messages
+	}
+
+	render (){
+		return (
+			<div class="container" style={{ paddingTop: '100px' }}>
+<<<<<<< HEAD
+				{this.state.action === 'setting' && <h1>{I18n.t('Setting network')}</h1>}
+				{this.state.action === 'checking' && <h1>{I18n.t('Checking connection')}</h1>}
+				{this.state.action === 'finish' && <h1>{I18n.t('Congratulations')}</h1>}
+				{!this.state.hostname && <ProgressBar progress={this.state.progress} />}
+				{this.state.notOnNetwork && <p>{I18n.t('You are connected to another node in the network, try connecting to')} {this.props.expectedNetwork}/{this.props.expectedHost}</p>}
+				{this.state.time > 0 && <div style={{ width: '100%' }}>
+					<span style={{ margin: '0 auto', textAlign: 'center' }}>{I18n.t('Please wait')} {this.state.time} {I18n.t('seconds')}</span>
+				</div>}
+				{this.state.hostname && <div>
+					<p>{I18n.t('You have successfuly connected to')} {this.state.hostname}</p>
+					<p>{I18n.t('You are now part of ')} {this.props.expectedNetwork}</p>
+					<button onClick={this.reload}>{I18n.t('Reload page')}</button>
+				</div>}
+=======
+				<h1>{I18n.t('Setting network')}</h1>
+				<ProgressBar progress={this.state.progress} />
+				<div style={{ width: '100%' }}>
+					<span style={{ margin: '0 auto', textAlign: 'center' }}>{I18n.t('Please wait')} {this.state.time} {I18n.t('seconds')}</span>
+				</div>
+>>>>>>> feat(fbw): add new options and alert messages
+			</div>
+		);
+	}
+}
+
+<<<<<<< HEAD
+const mapStateToProps = (state) => ({
+	expectedHost: state.firstbootwizard.expectedHost,
+	expectedNetwork: state.firstbootwizard.expectedNetwork
+});
+
+const mapDispatchToProps = (dispatch) => ({});
+
+export default connect(mapStateToProps, mapDispatchToProps)(Setting);
+=======
+export default Setting;
+>>>>>>> feat(fbw): add new options and alert messages
