@@ -1,4 +1,4 @@
-import { h } from 'preact';
+import {h} from 'preact';
 import { Trans } from '@lingui/macro';
 export const Menu = () => (
     <span>
