@@ -1,64 +1,75 @@
+import "@testing-library/jest-dom";
+import {
+    act,
+    cleanup,
+    fireEvent,
+    screen,
+    within,
+} from "@testing-library/preact";
+import { enableFetchMocks } from "jest-fetch-mock";
+import waitForExpect from "wait-for-expect";
 
-import FbwPage from './FbwPage';
-import { fireEvent, screen, within, act, cleanup } from '@testing-library/preact';
-import '@testing-library/jest-dom';
-import { render, flushPromises } from 'utils/test_utils';
-import { AppContextProvider } from 'utils/app.context';
-import { createNetwork, setNetwork, scanStart, getStatus, scanStop} from './FbwApi';
-import { enableFetchMocks } from 'jest-fetch-mock';
-import { getBoardData } from 'utils/api';
-import waitForExpect from 'wait-for-expect';
-import queryCache from 'utils/queryCache';
+import { getBoardData } from "utils/api";
+import { AppContextProvider } from "utils/app.context";
+import queryCache from "utils/queryCache";
+import { flushPromises, render } from "utils/test_utils";
 
+import {
+    createNetwork,
+    getStatus,
+    scanStart,
+    scanStop,
+    setNetwork,
+} from "./FbwApi";
+import FbwPage from "./FbwPage";
 
-
-jest.mock('./FbwApi');
-jest.mock('utils/api');
-enableFetchMocks()
+jest.mock("./FbwApi");
+jest.mock("utils/api");
+enableFetchMocks();
 
 const advanceToChecking = async () => {
     fireEvent.click(
-        await screen.findByRole('button', { name: /Create network/i })
+        await screen.findByRole("button", { name: /Create network/i })
     );
     fireEvent.input(
-        await screen.findByLabelText('Choose a name for your network'),
-        { target: { value: 'ournetwork' } }
+        await screen.findByLabelText("Choose a name for your network"),
+        { target: { value: "ournetwork" } }
     );
     fireEvent.input(
-        await screen.findByLabelText('Choose a shared password for network administration'),
-        { target: { value: 'somepassword123' } }
+        await screen.findByLabelText(
+            "Choose a shared password for network administration"
+        ),
+        { target: { value: "somepassword123" } }
     );
     fireEvent.input(
-        await screen.findByLabelText('Re-enter the shared password'),
-        { target: { value: 'somepassword123' } }
+        await screen.findByLabelText("Re-enter the shared password"),
+        { target: { value: "somepassword123" } }
     );
     fireEvent.input(
-        await screen.findByLabelText('Choose a name for this node'),
-        { target: { value: 'mynode' } }
+        await screen.findByLabelText("Choose a name for this node"),
+        { target: { value: "mynode" } }
     );
     fireEvent.click(
-        await screen.findByRole('button', { name: /Create network/i })
+        await screen.findByRole("button", { name: /Create network/i })
     );
     // fastforward 125 seconds of waiting time...
     for (let i = 0; i < 125; i++) {
         jest.advanceTimersByTime(1000);
         await flushPromises();
     }
-}
-
+};
 
 const advanceToJoinNetwork = async () => {
     fireEvent.click(
-        await screen.findByRole('button', { name: /Search network/i })
+        await screen.findByRole("button", { name: /Search network/i })
     );
+};
 
-}
-
-describe('Fbw Page', () => {
+describe("Fbw Page", () => {
     beforeEach(() => {
         fetch.resetMocks();
-        createNetwork.mockImplementation(async () => ({ status: 'done' }));
-    })
+        createNetwork.mockImplementation(async () => ({ status: "done" }));
+    });
 
     beforeAll(() => {
         jest.useFakeTimers();
@@ -66,188 +77,270 @@ describe('Fbw Page', () => {
 
     afterAll(() => {
         jest.useRealTimers();
-    })
-
-
-    it('asks to connect to the wifi network for this node if cannot get hostname', async () => {
-        fetch.mockReject();
-        render(<AppContextProvider><FbwPage /></AppContextProvider>);
-        await advanceToChecking();
-        expect(await screen
-            .findByText('You should try to connect to the network ournetwork/mynode.'))
-            .toBeInTheDocument();
     });
 
-    it('asks to connect to the wifi network for this node if getting different hostname ', async () => {
-        fetch.mockResponse('anothernode\n');
-        render(<AppContextProvider><FbwPage /></AppContextProvider>);
+    it("asks to connect to the wifi network for this node if cannot get hostname", async () => {
+        fetch.mockReject();
+        render(
+            <AppContextProvider>
+                <FbwPage />
+            </AppContextProvider>
+        );
         await advanceToChecking();
-        expect(await screen
-            .findByText('You are connected to another node in the network, try connecting to ournetwork/mynode'))
-            .toBeInTheDocument();
-    });    
-})
+        expect(
+            await screen.findByText(
+                "You should try to connect to the network ournetwork/mynode."
+            )
+        ).toBeInTheDocument();
+    });
 
+    it("asks to connect to the wifi network for this node if getting different hostname", async () => {
+        fetch.mockResponse("anothernode\n");
+        render(
+            <AppContextProvider>
+                <FbwPage />
+            </AppContextProvider>
+        );
+        await advanceToChecking();
+        expect(
+            await screen.findByText(
+                "You are connected to another node in the network, try connecting to ournetwork/mynode"
+            )
+        ).toBeInTheDocument();
+    });
+});
 
-describe('Fbw Join Network Page', () => {
-    
-    beforeEach(() => {
-        render(<AppContextProvider><FbwPage /></AppContextProvider>);
-    })
-
+describe("Fbw Join Network Page", () => {
     beforeAll(() => {
-        getBoardData.mockImplementation(async() => boardData)
-        getStatus.mockImplementation(async () => allScanCases)
-        scanStart.mockImplementation(async () => scanActionSuccess)
+        getBoardData.mockImplementation(async () => boardData);
+        getStatus.mockImplementation(async () => allScanCases);
+        scanStart.mockImplementation(async () => scanActionSuccess);
     });
 
     afterEach(() => {
-		cleanup();
-		act(() => queryCache.clear());
-    })
+        cleanup();
+        act(() => queryCache.clear());
+    });
 
-    it('join to existing network from scan results', async () => {
-        await advanceToJoinNetwork()
-        await waitForExpect(async () => {
-            expect(await screen.findByText('ql-refu-bbone')).toBeInTheDocument();
-          });
-        let tile = within(await screen.findByTestId('38:AB:C0:C1:D6:70'.replaceAll(":", "_")))        
-        fireEvent.click(
-            await tile.findByRole('button', { name: /Select/i })
-        )
-        fireEvent.input(
-            await screen.findByLabelText('Choose a name for this node'),
-            { target: { value: 'mynode' } }
+    it("join to existing network from scan results", async () => {
+        render(
+            <AppContextProvider>
+                <FbwPage />
+            </AppContextProvider>
         );
-        setNetwork.mockImplementation(async () => setNetworkRes)
-        
+        await advanceToJoinNetwork();
+        await waitForExpect(async () => {
+            expect(
+                await screen.findByText("ql-refu-bbone")
+            ).toBeInTheDocument();
+        });
+        let tile = within(
+            await screen.findByTestId("38:AB:C0:C1:D6:70".replaceAll(":", "_"))
+        );
+        fireEvent.click(await tile.findByRole("button", { name: /Select/i }));
+        fireEvent.input(
+            await screen.findByLabelText("Choose a name for this node"),
+            { target: { value: "mynode" } }
+        );
+        setNetwork.mockImplementation(async () => setNetworkRes);
+
         fireEvent.click(
-            await screen.findByRole('button', { name: /Set network/i })
-        )
+            await screen.findByRole("button", { name: /Set network/i })
+        );
         await waitForExpect(() => {
             expect(setNetwork).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    file: 'lime-community__host__ql-refu-bbone__38:AB:C0:C1:D6:70',
-                    hostname: 'mynode',
+                    file: "lime-community__host__ql-refu-bbone__38:AB:C0:C1:D6:70",
+                    hostname: "mynode",
                 })
-            )
+            );
         });
-        expect(await screen.findByText('Setting network')).toBeInTheDocument();
+        expect(await screen.findByText("Setting network")).toBeInTheDocument();
     });
 
-
-    it('shows community name for results with successful config download', async () => { 
-        await advanceToJoinNetwork()
+    it("shows community name for results with successful config download", async () => {
+        render(
+            <AppContextProvider>
+                <FbwPage />
+            </AppContextProvider>
+        );
+        await advanceToJoinNetwork();
         await waitForExpect(async () => {
-            expect(await screen.findByText('(quintana.libre.org.ar)')).toBeInTheDocument();
-        });
-    });
-
-    it('shows "Fetching name" when config community file is downloading', async () => {  
-        await advanceToJoinNetwork()
-        await waitForExpect(async () => {
-            expect(await screen.findByText('Fetching name')).toBeInTheDocument();
-        });
-    });
-
-    it('shows "Connection attempt not yet started" when a network is scanned but the config donwload is not started', async () => {  
-        await advanceToJoinNetwork()
-        await waitForExpect(async () => {
-            expect(await screen.findByText('Connection attempt not yet started')).toBeInTheDocument();
+            expect(
+                await screen.findByText("(quintana.libre.org.ar)")
+            ).toBeInTheDocument();
         });
     });
 
-    it('shows "Error downloading lime community" when config file was not downloaded properly', async () => {  
-        await advanceToJoinNetwork()
+    it('shows "Fetching name" when config community file is downloading', async () => {
+        render(
+            <AppContextProvider>
+                <FbwPage />
+            </AppContextProvider>
+        );
+        await advanceToJoinNetwork();
         await waitForExpect(async () => {
-            expect(await screen.findByText('Error downloading lime community')).toBeInTheDocument();
-        });
-    });
-    it('shows "Error destination network is not configured yet" when destination node is not configured', async () => {  
-        await advanceToJoinNetwork()
-        await waitForExpect(async () => {
-            expect(await screen.findByText('Error destination network is not configured yet')).toBeInTheDocument();
-        });
-    });
-
-    it('shows "Error downloading lime assets" if error when downloading community assets', async () => {  
-        await advanceToJoinNetwork()
-        await waitForExpect(async () => {
-            expect(await screen.findByText('Error downloading lime assets')).toBeInTheDocument();
+            expect(
+                await screen.findByText("Fetching name")
+            ).toBeInTheDocument();
         });
     });
 
-    it('shows loader when status is scanning', async () => {
-        await advanceToJoinNetwork()
+    it('shows "Connection attempt not yet started" when a network is scanned but the config donwload is not started', async () => {
+        render(
+            <AppContextProvider>
+                <FbwPage />
+            </AppContextProvider>
+        );
+        await advanceToJoinNetwork();
         await waitForExpect(async () => {
-            expect(await screen.findByTestId('loading')).toBeInTheDocument();
+            expect(
+                await screen.findByText("Connection attempt not yet started")
+            ).toBeInTheDocument();
         });
-    })
+    });
 
-    it('not shows loader when status is scanned', async () => {
+    it('shows "Error downloading lime community" when config file was not downloaded properly', async () => {
+        render(
+            <AppContextProvider>
+                <FbwPage />
+            </AppContextProvider>
+        );
+        await advanceToJoinNetwork();
+        await waitForExpect(async () => {
+            expect(
+                await screen.findByText("Error downloading lime community")
+            ).toBeInTheDocument();
+        });
+    });
+    it('shows "Error destination network is not configured yet" when destination node is not configured', async () => {
+        render(
+            <AppContextProvider>
+                <FbwPage />
+            </AppContextProvider>
+        );
+        await advanceToJoinNetwork();
+        await waitForExpect(async () => {
+            expect(
+                await screen.findByText(
+                    "Error destination network is not configured yet"
+                )
+            ).toBeInTheDocument();
+        });
+    });
+
+    it('shows "Error downloading lime assets" if error when downloading community assets', async () => {
+        render(
+            <AppContextProvider>
+                <FbwPage />
+            </AppContextProvider>
+        );
+        await advanceToJoinNetwork();
+        await waitForExpect(async () => {
+            expect(
+                await screen.findByText("Error downloading lime assets")
+            ).toBeInTheDocument();
+        });
+    });
+
+    it("shows loader when status is scanning", async () => {
+        render(
+            <AppContextProvider>
+                <FbwPage />
+            </AppContextProvider>
+        );
+        await advanceToJoinNetwork();
+        await waitForExpect(async () => {
+            expect(await screen.findByTestId("loading")).toBeInTheDocument();
+        });
+    });
+
+    it("not shows loader when status is scanned", async () => {
+        render(
+            <AppContextProvider>
+                <FbwPage />
+            </AppContextProvider>
+        );
         getStatus.mockImplementation(async () => {
-            allScanCases.status = 'scanned'
-            return allScanCases
-        })
-
-        await advanceToJoinNetwork()
-        await waitForExpect(async () => {
-            expect(screen.queryByTestId('loading')).not.toBeInTheDocument();
+            allScanCases.status = "scanned";
+            return allScanCases;
         });
-    })
 
-    it('return to select action when cancel is pressed on scan list page', async () => {
-        scanStop.mockImplementation(async () => scanActionSuccess )
-
-        await advanceToJoinNetwork()
+        await advanceToJoinNetwork();
         await waitForExpect(async () => {
-            expect(await screen.findByText('ql-refu-bbone')).toBeInTheDocument();
-          });
+            expect(screen.queryByTestId("loading")).not.toBeInTheDocument();
+        });
+    });
 
-        fireEvent.click(
-            await screen.findByRole('button', { name: /Cancel/i })
-        )
-        expect(await screen.findByText('Configure your network')).toBeInTheDocument();
-        expect(scanStop).toHaveBeenCalled()      
-    })
+    it("return to select action when cancel is pressed on scan list page", async () => {
+        render(
+            <AppContextProvider>
+                <FbwPage />
+            </AppContextProvider>
+        );
+        scanStop.mockImplementation(async () => scanActionSuccess);
 
-    it('return to select action when cancel is pressed on join network page', async () => {
-        scanStop.mockImplementation(async () => scanActionSuccess )
-
-        await advanceToJoinNetwork()
-        let tile = within(await screen.findByTestId('38:AB:C0:C1:D6:70'.replaceAll(":", "_")))        
-        fireEvent.click(
-            await tile.findByRole('button', { name: /Select/i })
-        )
-        fireEvent.click(
-            await screen.findByRole('button', { name: /Cancel/i })
-        )
-        expect(await screen.findByText('Configure your network')).toBeInTheDocument();
-
-        expect(scanStop).toHaveBeenCalled()
-    })
-
-    it('shows an error toast when stop scan could not be completed', async () => {
-
-        scanStop.mockImplementation(async () => scanActionFailure )
-
-        await advanceToJoinNetwork()
+        await advanceToJoinNetwork();
         await waitForExpect(async () => {
-            expect(await screen.findByText('ql-refu-bbone')).toBeInTheDocument();
-          });
+            expect(
+                await screen.findByText("ql-refu-bbone")
+            ).toBeInTheDocument();
+        });
 
-        fireEvent.click(
-            await screen.findByRole('button', { name: /Cancel/i })
-        )
-        expect(await screen.findByText('Error stopping scan')).toBeInTheDocument();
-        expect(scanStop).toHaveBeenCalled()  
-    })
-})
+        fireEvent.click(await screen.findByRole("button", { name: /Cancel/i }));
+        expect(
+            await screen.findByText("Welcome to LimeApp")
+        ).toBeInTheDocument();
+        expect(scanStop).toHaveBeenCalled();
+    });
 
+    it("return to select action when cancel is pressed on join network page", async () => {
+        render(
+            <AppContextProvider>
+                <FbwPage />
+            </AppContextProvider>
+        );
+        scanStop.mockImplementation(async () => scanActionSuccess);
 
-const setNetworkRes = JSON.parse(`{ 
+        await advanceToJoinNetwork();
+        let tile = within(
+            await screen.findByTestId("38:AB:C0:C1:D6:70".replaceAll(":", "_"))
+        );
+        fireEvent.click(await tile.findByRole("button", { name: /Select/i }));
+        fireEvent.click(await screen.findByRole("button", { name: /Cancel/i }));
+        expect(
+            await screen.findByText("Welcome to LimeApp")
+        ).toBeInTheDocument();
+
+        expect(scanStop).toHaveBeenCalled();
+    });
+
+    it("shows an error toast when stop scan could not be completed", async () => {
+        render(
+            <AppContextProvider>
+                <FbwPage />
+            </AppContextProvider>
+        );
+        scanStop.mockImplementation(async () => scanActionFailure);
+
+        await advanceToJoinNetwork();
+        await waitForExpect(async () => {
+            expect(
+                await screen.findByText("ql-refu-bbone")
+            ).toBeInTheDocument();
+        });
+
+        fireEvent.click(await screen.findByRole("button", { name: /Cancel/i }));
+        expect(
+            await screen.findByText("Error stopping scan")
+        ).toBeInTheDocument();
+        expect(scanStop).toHaveBeenCalled();
+    });
+});
+
+const setNetworkRes = JSON.parse(`{
     "status": "configuring"
-}`)
+}`);
 
 const boardData = JSON.parse(`{
     "kernel": "4.14.215",
@@ -262,11 +355,10 @@ const boardData = JSON.parse(`{
       "target": "x86/64",
       "description": "%LIME_DESCRIPTION%"
     }
-  }`
-)
+  }`);
 
-const scanActionSuccess = JSON.parse('{"status": true}')
-const scanActionFailure = JSON.parse('{"status": false}')
+const scanActionSuccess = JSON.parse('{"status": true}');
+const scanActionFailure = JSON.parse('{"status": false}');
 
 const allScanCases = JSON.parse(`{
     "lock" : true,
@@ -350,7 +442,7 @@ const allScanCases = JSON.parse(`{
             "bssid": "38:AB:C0:C1:D6:74",
             "channel": 1,
             "signal": -58
-          }, 
+          },
           {
             "status": {"retval": false, "code" : "error_download_lime_assets"},
             "quality": 60,
@@ -360,7 +452,6 @@ const allScanCases = JSON.parse(`{
             "channel": 1,
             "signal": -60
           }
-        
+
     ]
-}`
-)
+}`);
