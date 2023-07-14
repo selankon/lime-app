@@ -3,7 +3,6 @@ import { VNode } from "preact";
 import { Button } from "components/buttons/button";
 import { BinIcon } from "components/icons/bin";
 import { EditIcon } from "components/icons/edit";
-import { StatusIcon } from "components/icons/status";
 
 interface IStatusMessage {
     isError: boolean;
@@ -38,11 +37,7 @@ export const StatusMessage = ({
     <div
         className={`flex flex-row gap-3 ${classes} items-center justify-center text-center`}
     >
-        {isError ? (
-            <StatusIcon status={"warning"} />
-        ) : (
-            <StatusIcon status={"success"} />
-        )}
+        {isError ? <Warning /> : <Tick />}
         {children}
     </div>
 );
