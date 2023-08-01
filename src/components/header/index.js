@@ -1,6 +1,8 @@
 import { Fragment } from "preact";
 import { useState } from "preact/hooks";
 
+import AlertIcon from "plugins/lime-plugin-alerts/src/alertIcon";
+
 import { useBoardData } from "utils/queries";
 
 import { useAppContext } from "../../utils/app.context";
@@ -20,13 +22,16 @@ export const Header = ({ Menu }) => {
             <header className={style.header}>
                 {boardData && <h1>{boardData.hostname}</h1>}
                 {boardData && menuEnabled && (
-                    <div
-                        className={`${style.hamburger} ${
-                            menuOpened ? style.isActive : ""
-                        }`}
-                        onClick={toggleMenu}
-                    >
-                        <span>toogle menu</span>
+                    <div className="flex items-center ">
+                        <AlertIcon />
+                        <div
+                            className={`${style.hamburger} ${
+                                menuOpened ? style.isActive : ""
+                            }`}
+                            onClick={toggleMenu}
+                        >
+                            <span>toogle menu</span>
+                        </div>
                     </div>
                 )}
             </header>

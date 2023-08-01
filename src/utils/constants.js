@@ -7,3 +7,5 @@ export const DEFAULT_COMMUNITY_SETTINGS = {
     mw_link_signal_threshold: 10,
     mw_link_chain_threshold: 3,
 };
+
+export const ALERTS_REFETCH_INTERVAL = 30000; // ms
