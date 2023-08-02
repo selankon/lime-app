@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 import { getAlerts } from "plugins/lime-plugin-alerts/src/alertsMocks";
 
@@ -7,3 +7,10 @@ export function useAlerts(params) {
         ...params,
     });
 }
+
+const unreadCounter = async (c: number) => c;
+export const useUnreadCount = () => {
+    return useMutation({
+        mutationFn: unreadCounter,
+    });
+};

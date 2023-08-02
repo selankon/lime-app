@@ -3,7 +3,11 @@ import { useEffect, useState } from "preact/hooks";
 import Badge from "components/badge";
 import { Bell } from "components/icons/notification/bell";
 
-import { useAlerts } from "plugins/lime-plugin-alerts/src/alertsQueries";
+import { oneAlerts } from "plugins/lime-plugin-alerts/src/alertsMocks";
+import {
+    useAlerts,
+    useUnreadCount,
+} from "plugins/lime-plugin-alerts/src/alertsQueries";
 import { AlertList } from "plugins/lime-plugin-alerts/src/alertsTypes";
 import { unreadCount } from "plugins/lime-plugin-alerts/src/utils/unreadCount";
 
@@ -13,13 +17,15 @@ const AlertIcon = () => {
     const [oldData, setOldData] = useState<AlertList>(null);
     const { data, isSuccess } = useAlerts({
         refetchInterval: ALERTS_REFETCH_INTERVAL,
+        placeholderData: oneAlerts,
     });
-    const [count, setCount] = useState(0);
+    const { mutate: setUnreadCount, data: count } = useUnreadCount();
 
     useEffect(() => {
         if (isSuccess && data) {
             if (oldData) {
-                setCount(unreadCount(data, oldData));
+                const unread = unreadCount(data, oldData);
+                if (unread) setUnreadCount(unread);
             }
             setOldData(data);
         }
