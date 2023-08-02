@@ -1,7 +1,7 @@
 import { AlertList } from "plugins/lime-plugin-alerts/src/alertsTypes";
 
-export const getAlerts = async () => twoAlerts;
+export const getAlerts = async () => noAlerts;
 
-const noAlerts: AlertList = [];
+export const noAlerts: AlertList = [];
 export const oneAlerts: AlertList = [{ id: "not1" }];
-const twoAlerts: AlertList = [...oneAlerts, { id: "not2" }];
+export const twoAlerts: AlertList = [...oneAlerts, { id: "not2" }];
