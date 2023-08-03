@@ -1,3 +1,4 @@
+import Alerts from "plugins/lime-plugin-alerts";
 import Align from "plugins/lime-plugin-align";
 import ChangeNode from "plugins/lime-plugin-changeNode";
 import Fbw from "plugins/lime-plugin-fbw";
@@ -29,4 +30,5 @@ export const plugins: LimePlugin[] = [
     Pirania,
     Fbw, // fbw does not have menu item
     MeshWideUpgrade, // Does not have menu item
+    Alerts, // Does not have menu item
 ];
