@@ -5,7 +5,7 @@ import { NotificationWarning } from "components/icons/notification/warning";
 
 type NotificationType = "warning" | "update";
 
-const Notification = ({
+const Alert = ({
     title,
     children,
     right,
@@ -48,4 +48,4 @@ const Notification = ({
     );
 };
 
-export default Notification;
+export default Alert;
