@@ -22,5 +22,5 @@ describe("align page", () => {
     it.skip("check that badge appear if new alerts appear", async () => {});
     it.skip("check badge is not shown if less second call has less alerts", async () => {});
     it.skip("alert bell disappear when no more alerts", async () => {});
-    it.skip("", async () => {});
+    it.skip("check that unread count is not shown when accessing the alerts page", async () => {});
 });
