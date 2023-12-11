@@ -8,8 +8,8 @@ interface IListItemProps {
     leftComponent?: ComponentChildren;
     rightComponent?: ComponentChildren;
     title: string;
-    description?: string;
-    rightText?: string;
+    description?: string | ComponentChildren;
+    rightText?: string | ComponentChildren;
     onClick?: (ev) => void;
 }
 
