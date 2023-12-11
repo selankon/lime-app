@@ -3,11 +3,11 @@ import { VNode } from "preact";
 import { useState } from "preact/hooks";
 
 import { Button } from "components/buttons/button";
+import { StatusIcon } from "components/icons/status";
 import Tabs from "components/tabs";
 
 import { StatusAndButton } from "plugins/lime-plugin-mesh-wide/src/components/Components";
 import { usePointToPointErrors } from "plugins/lime-plugin-mesh-wide/src/hooks/useLocatedLinks";
-import ErrorIcon from "plugins/lime-plugin-mesh-wide/src/icons/errorIcon";
 import { PowerIcon } from "plugins/lime-plugin-mesh-wide/src/icons/power";
 import { MacToMacLink } from "plugins/lime-plugin-mesh-wide/src/lib/links/PointToPointLink";
 import { readableBytes } from "plugins/lime-plugin-mesh-wide/src/lib/utils";
@@ -37,7 +37,9 @@ const BatmanDetail = ({
             <Row>
                 <div className={"flex"}>
                     <strong>{name}</strong>{" "}
-                    {errorsArray.length > 0 && <ErrorIcon />}
+                    {errorsArray.length > 0 && (
+                        <StatusIcon status={"warning"} />
+                    )}
                 </div>
             </Row>
             <Row>
@@ -66,7 +68,9 @@ const WifiDetail = ({
             <Row>
                 <div className={"flex"}>
                     <strong>{name}</strong>{" "}
-                    {errorsArray.length > 0 && <ErrorIcon />}
+                    {errorsArray.length > 0 && (
+                        <StatusIcon status={"warning"} />
+                    )}
                 </div>
             </Row>
             <Row>
@@ -179,7 +183,7 @@ const LinkFeatureDetail = ({ actual, reference }: LinkMapFeature) => {
                         <Trans>
                             Link {i + 1}{" "}
                             {errors.macToMacErrors[link.id].hasErrors ? (
-                                <ErrorIcon />
+                                <StatusIcon status={"warning"} />
                             ) : null}
                         </Trans>
                     </div>
