@@ -1,44 +1,4 @@
-import { DivIconOptions, IconOptions } from "leaflet";
-
-const leafletVersion = "1.9.3";
-
-function loadLeafletScript() {
-    return new Promise((res, rej) => {
-        if (document.getElementById("leaflet-script")) {
-            // @ts-ignore
-            res();
-        } else {
-            const script = document.createElement("script");
-            script.onload = res;
-            script.onerror = rej;
-            script.src = `https://unpkg.com/leaflet@${leafletVersion}/dist/leaflet.js`;
-            script.id = "leaflet-script";
-            document.body.appendChild(script);
-        }
-    });
-}
-
-function loadLeafletStylesheet() {
-    return new Promise((res, rej) => {
-        if (document.getElementById("leaflet-style")) {
-            // @ts-ignore
-            res();
-        } else {
-            const style = document.createElement("link");
-            style.onload = res;
-            style.onerror = rej;
-            style.rel = "stylesheet";
-            style.href = `https://unpkg.com/leaflet@${leafletVersion}/dist/leaflet.css`;
-            style.id = "leaflet-style";
-            document.head.appendChild(style);
-        }
-    });
-}
-
-export function loadLeafLet() {
-    // Leaflet script must be loaded after leaflet stylesheet
-    return loadLeafletStylesheet().then(loadLeafletScript);
-}
+import { IconOptions } from "leaflet";
 
 export const homeIcon: IconOptions = {
     iconUrl:

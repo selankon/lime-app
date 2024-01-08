@@ -1,6 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 
-import { loadLeafLet } from "plugins/lime-plugin-locate/src/leafletUtils";
 import {
     changeLocation,
     getLocation,
@@ -63,12 +62,6 @@ export function useChangeLocation(params) {
                         : oldData
             );
         },
-        ...params,
-    });
-}
-
-export function useLoadLeaflet(params) {
-    return useQuery(["lime-location", "load_leaflet"], loadLeafLet, {
         ...params,
     });
 }
