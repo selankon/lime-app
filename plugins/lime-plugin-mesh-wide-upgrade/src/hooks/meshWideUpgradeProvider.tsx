@@ -97,7 +97,6 @@ export const MeshWideUpgradeProvider = ({
 
     // Inner state to control is aborting callback awaiting until query invalidation
     const [isAborting, setIsAborting] = useState(false);
-    // const { mutateAsync: abortMutation } = useAbort({});
     const { callMutations: abortMutation } = useParallelAbort();
 
     const { data: session } = useSession();

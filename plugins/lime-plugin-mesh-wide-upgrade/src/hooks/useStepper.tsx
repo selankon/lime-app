@@ -39,7 +39,10 @@ export const getStepperStatus = (
         return "ABORTING";
     }
 
-    if (downloadStatus === "download-failed") {
+    if (
+        downloadStatus === "download-failed" ||
+        thisNode.upgrade_state === "ERROR"
+    ) {
         return "ERROR";
     }
 
@@ -92,9 +95,6 @@ export const getStepperStatus = (
             return "CONFIRMATION_PENDING";
         }
         return thisNode.upgrade_state;
-    }
-    if (thisNode.upgrade_state === "ERROR") {
-        return "ERROR";
     }
     return "INITIAL";
 };
@@ -262,10 +262,10 @@ export const useStep = () => {
         }
         return step;
     }, [
-        abort,
         allNodesReadyForUpgrade,
         becomeMainNode,
         scheduleErrors?.length,
+        showAbortModal,
         showConfirmationModal,
         showFooter,
         showScheduleModal,
