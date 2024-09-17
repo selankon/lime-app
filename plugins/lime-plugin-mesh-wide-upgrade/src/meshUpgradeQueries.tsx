@@ -14,7 +14,12 @@ import {
     MeshWideUpgradeInfo,
     NodeMeshUpgradeInfo,
 } from "plugins/lime-plugin-mesh-wide-upgrade/src/meshUpgradeTypes";
-import { getNodeIpsByCondition } from "plugins/lime-plugin-mesh-wide-upgrade/src/utils/api";
+import {
+    abortCondition,
+    confirmCondition,
+    getNodeIpsByCondition,
+    scheduleCondition,
+} from "plugins/lime-plugin-mesh-wide-upgrade/src/utils/api";
 
 import { useMeshWideSyncCall } from "utils/meshWideSyncCall";
 
@@ -64,10 +69,7 @@ export type UseScheduleMeshSafeUpgradeType = ReturnType<
 export const useParallelScheduleUpgrade = (opts?) => {
     // State to store the errors
     const { data: nodes } = useMeshWideUpgradeInfo({});
-    const ips = getNodeIpsByCondition(
-        nodes,
-        (node) => node.upgrade_state === "READY_FOR_UPGRADE"
-    );
+    const ips = getNodeIpsByCondition(nodes, scheduleCondition);
     // localStorage.setItem("hideReleaseBannerPlease", value);
     return useMeshWideSyncCall({
         mutationKey: meshUpgradeQueryKeys.remoteScheduleUpgrade(),
@@ -83,10 +85,7 @@ export type UseConfirmUpgradeType = ReturnType<
 export const useParallelConfirmUpgrade = (opts?) => {
     // State to store the errors
     const { data: nodes } = useMeshWideUpgradeInfo({});
-    const ips = getNodeIpsByCondition(
-        nodes,
-        (node) => node.upgrade_state === "CONFIRMATION_PENDING"
-    );
+    const ips = getNodeIpsByCondition(nodes, confirmCondition);
     return useMeshWideSyncCall({
         mutationKey: meshUpgradeQueryKeys.remoteConfirmUpgrade(),
         mutationFn: remoteConfirmUpgrade,
@@ -98,14 +97,7 @@ export const useParallelConfirmUpgrade = (opts?) => {
 export const useParallelAbort = (opts?) => {
     // State to store the errors
     const { data: nodes } = useMeshWideUpgradeInfo({});
-    const ips = getNodeIpsByCondition(nodes, (node) =>
-        [
-            "READY_FOR_UPGRADE",
-            "UPGRADE_SCHEDULED",
-            "CONFIRMATION_PENDING",
-            "ERROR",
-        ].includes(node.upgrade_state)
-    );
+    const ips = getNodeIpsByCondition(nodes, abortCondition);
     return useMeshWideSyncCall({
         mutationKey: meshUpgradeQueryKeys.remoteAbort(),
         mutationFn: remoteAbort,

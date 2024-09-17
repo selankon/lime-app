@@ -4,6 +4,16 @@ import { useCallback } from "react";
 
 import { useModal } from "components/Modal/Modal";
 
+import { useMeshWideUpgradeInfo } from "plugins/lime-plugin-mesh-wide-upgrade/src/meshUpgradeQueries";
+import {
+    ConditionFun,
+    abortCondition,
+    confirmCondition,
+    getNodeIpsByCondition,
+    getNodesByCondition,
+    scheduleCondition,
+} from "plugins/lime-plugin-mesh-wide-upgrade/src/utils/api";
+
 interface IUseParallelQueriesModalProps {
     useSuccessBtn?: boolean;
     cb?: (e) => void;
@@ -53,15 +63,23 @@ export const useScheduleUpgradeModal = ({
 }: IUseParallelQueriesModalProps) => {
     let title = <Trans>All nodes are ready</Trans>;
     let content = (
-        <Trans>Schedule a firmware upgrade for all nodes on the network</Trans>
+        <div>
+            <Trans>
+                Schedule a firmware upgrade for all nodes on the network
+            </Trans>
+            <TargetNodes condition={scheduleCondition} />
+        </div>
     );
     if (!useSuccessBtn) {
         title = <Trans>Some nodes are not ready</Trans>;
         content = (
-            <Trans>
-                Are you sure you want to start mesh wide upgrade? <br />
-                Check node list to see the network status
-            </Trans>
+            <div>
+                <Trans>
+                    Are you sure you want to start mesh wide upgrade? <br />
+                    Check node list to see the network status
+                </Trans>
+                <TargetNodes condition={scheduleCondition} />
+            </div>
         );
     }
 
@@ -79,17 +97,26 @@ export const useConfirmModal = ({
 }: IUseParallelQueriesModalProps) => {
     let title = <Trans>All nodes are upgraded successfully</Trans>;
     let content = (
-        <Trans>Confirm mesh wide upgrade for all nodes on the network</Trans>
+        <div>
+            <Trans>
+                Confirm mesh wide upgrade for all nodes on the network
+            </Trans>
+            <TargetNodes condition={confirmCondition} />
+        </div>
     );
     if (!useSuccessBtn) {
         title = <Trans>Some nodes don't upgraded properly</Trans>;
         content = (
-            <Trans>
-                Are you sure you want to confirm the upgrade? <br />
-                Check node list to see the network status
-            </Trans>
+            <div>
+                <Trans>
+                    Are you sure you want to confirm the upgrade? <br />
+                    Check node list to see the network status
+                </Trans>
+                <TargetNodes condition={abortCondition} />
+            </div>
         );
     }
+
     return useParallelQueriesModal({
         useSuccessBtn,
         cb,
@@ -102,10 +129,13 @@ export const useConfirmModal = ({
 export const useAbortModal = ({ cb }: IUseParallelQueriesModalProps) => {
     const title = <Trans>Abort current mesh wide upgrade?</Trans>;
     const content = (
-        <Trans>
-            This will the abort current upgrade process on all nodes. Are you
-            sure you want to proceed?
-        </Trans>
+        <div>
+            <Trans>
+                This will the abort current upgrade process on all nodes. Are
+                you sure you want to proceed?
+            </Trans>
+            <TargetNodes condition={abortCondition} />
+        </div>
     );
     const btnTxt = <Trans>Abort</Trans>;
     return useParallelQueriesModal({
@@ -115,4 +145,23 @@ export const useAbortModal = ({ cb }: IUseParallelQueriesModalProps) => {
         content,
         btnTxt,
     });
+};
+
+const TargetNodes = ({ condition }: { condition: ConditionFun }) => {
+    const { data: nodes } = useMeshWideUpgradeInfo({});
+
+    const targets = getNodesByCondition(nodes, condition).map(
+        ([nodeName]) => nodeName
+    );
+
+    return (
+        <div>
+            <Trans>
+                If a node don't appear here check network state to ensure node
+                is ready for this operation. Network state needs a time to be
+                updated
+            </Trans>
+            <div>{targets.join(", ")}</div>
+        </div>
+    );
 };
