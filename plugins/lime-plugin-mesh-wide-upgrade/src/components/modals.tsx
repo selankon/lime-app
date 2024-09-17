@@ -95,6 +95,7 @@ export const useConfirmModal = ({
         cb,
         title,
         content,
+        btnTxt: <Trans>Confirm</Trans>,
     });
 };
 
